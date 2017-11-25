@@ -3,11 +3,11 @@ from uuid import uuid4
 from ..utils import slugify, module_member
 
 
-USER_FIELDS = ['username', 'email']
+USER_FIELDS = ['name', 'email', 'avatar_url', 'profile_url', 'prefile_type']
 
 
 def get_username(strategy, details, backend, user=None, *args, **kwargs):
-    if 'username' not in backend.setting('USER_FIELDS', USER_FIELDS):
+    if 'name' not in backend.setting('USER_FIELDS', USER_FIELDS):
         return
     storage = strategy.storage
 
@@ -38,8 +38,8 @@ def get_username(strategy, details, backend, user=None, *args, **kwargs):
 
         if email_as_username and details.get('email'):
             username = details['email']
-        elif details.get('username'):
-            username = details['username']
+        elif details.get('name'):
+            username = details['name']
         else:
             username = uuid4().hex
 
@@ -47,18 +47,17 @@ def get_username(strategy, details, backend, user=None, *args, **kwargs):
                           if max_length is not None
                           else username)
         final_username = slug_func(clean_func(username[:max_length]))
-
         # Generate a unique username for current user using username
         # as base but adding a unique hash at the end. Original
         # username is cut to avoid any field max_length.
         # The final_username may be empty and will skip the loop.
         while not final_username or \
-              storage.user.user_exists(username=final_username):
+              storage.user.user_exists(name=final_username):
             username = short_username + uuid4().hex[:uuid_length]
             final_username = slug_func(clean_func(username[:max_length]))
     else:
         final_username = storage.user.get_username(user)
-    return {'username': final_username}
+    return {'name': final_username}
 
 
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
@@ -82,7 +81,7 @@ def user_details(strategy, details, user=None, *args, **kwargs):
         return
 
     changed = False  # flag to track changes
-    protected = ('username', 'id', 'pk', 'email') + \
+    protected = ('name', 'id', 'pk', 'email') + \
                 tuple(strategy.setting('PROTECTED_USER_FIELDS', []))
 
     # Update user model attributes with the new data sent by the current

@@ -18,7 +18,7 @@ class DoubanOAuth(BaseOAuth1):
 
     def get_user_details(self, response):
         """Return user details from Douban"""
-        return {'username': response["db:uid"]["$t"],
+        return {'name': response["db:uid"]["$t"],
                 'email': ''}
 
     def user_data(self, access_token, *args, **kwargs):
@@ -36,7 +36,7 @@ class DoubanOAuth2(BaseOAuth2):
     REDIRECT_STATE = False
     EXTRA_DATA = [
         ('id', 'id'),
-        ('uid', 'username'),
+        ('uid', 'name'),
         ('refresh_token', 'refresh_token'),
     ]
 
@@ -45,10 +45,13 @@ class DoubanOAuth2(BaseOAuth2):
         fullname, first_name, last_name = self.get_user_names(
             response.get('name', '')
         )
-        return {'username': response.get('uid', ''),
+        return {'name': fullname,
                 'fullname': fullname,
                 'first_name': first_name,
                 'last_name': last_name,
+                'avatar_url': response.get('large_avatar', ''),
+                'profile_url': response.get('alt', ''),
+                'prefile_type': 'douban',
                 'email': ''}
 
     def user_data(self, access_token, *args, **kwargs):

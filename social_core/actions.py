@@ -85,10 +85,13 @@ def do_complete(backend, login, user=None, redirect_name='next',
     else:
         url = setting_url(backend, 'LOGIN_ERROR_URL', 'LOGIN_URL')
 
-    if redirect_value and redirect_value != url:
-        redirect_value = quote(redirect_value)
-        url += ('&' if '?' in url else '?') + \
-               '{0}={1}'.format(redirect_name, redirect_value)
+    if redirect_value:
+        if not url:
+            url = redirect_value
+        if redirect_value != url:
+            redirect_value = quote(redirect_value)
+            url += ('&' if '?' in url else '?') + \
+                   '{0}={1}'.format(redirect_name, redirect_value)
 
     if backend.setting('SANITIZE_REDIRECTS', True):
         allowed_hosts = backend.setting('ALLOWED_REDIRECT_HOSTS', []) + \
