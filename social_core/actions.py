@@ -48,8 +48,6 @@ def do_complete(backend, login, user=None, redirect_name='next',
     # check if the output value is something else than a user and just
     # return it to the client
     user_model = backend.strategy.storage.user.user_model()
-    if user and not isinstance(user, user_model):
-        return user
 
     if is_authenticated:
         if not user:

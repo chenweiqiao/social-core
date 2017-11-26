@@ -7,7 +7,7 @@ from .oauth import BaseOAuth2, BaseOAuth1
 
 class DoubanOAuth(BaseOAuth1):
     """Douban OAuth authentication backend"""
-    name = 'douban'
+    name = 'douban-oauth'
     EXTRA_DATA = [('id', 'id')]
     AUTHORIZATION_URL = 'http://www.douban.com/service/auth/authorize'
     REQUEST_TOKEN_URL = 'http://www.douban.com/service/auth/request_token'
@@ -29,7 +29,7 @@ class DoubanOAuth(BaseOAuth1):
 
 class DoubanOAuth2(BaseOAuth2):
     """Douban OAuth authentication backend"""
-    name = 'douban-oauth2'
+    name = 'douban'
     AUTHORIZATION_URL = 'https://www.douban.com/service/auth2/auth'
     ACCESS_TOKEN_URL = 'https://www.douban.com/service/auth2/token'
     ACCESS_TOKEN_METHOD = 'POST'

@@ -1,5 +1,7 @@
 from uuid import uuid4
 
+from flask_security import logout_user, login_user, current_user
+
 from ..utils import slugify, module_member
 
 
@@ -10,8 +12,11 @@ def get_username(strategy, details, backend, user=None, *args, **kwargs):
     if 'name' not in backend.setting('USER_FIELDS', USER_FIELDS):
         return
     storage = strategy.storage
+    social = None
+    if user:
+        social = backend.strategy.storage.user.get_social_auth_for_user(user).first()
 
-    if not user:
+    if not user or (social and social.provider != backend.name):
         email_as_username = strategy.setting('USERNAME_IS_FULL_EMAIL', False)
         uuid_length = strategy.setting('UUID_LENGTH', 16)
         max_length = storage.user.username_max_length()
@@ -61,17 +66,29 @@ def get_username(strategy, details, backend, user=None, *args, **kwargs):
 
 
 def create_user(strategy, details, backend, user=None, *args, **kwargs):
+    relogin = False
     if user:
-        return {'is_new': False}
+        social = backend.strategy.storage.user.get_social_auth_for_user(user).first()
+        if backend.name == social.provider and getattr(
+                user, '{}_url'.format(backend.name)) == \
+                details.get('profile_url'):
+            return {'is_new': False}
+        else:
+            relogin = True
 
     fields = dict((name, kwargs.get(name, details.get(name)))
                   for name in backend.setting('USER_FIELDS', USER_FIELDS))
     if not fields:
         return
 
+    user = strategy.create_user(**fields)
+    if relogin:
+        logout_user()
+        login_user(user)
+
     return {
         'is_new': True,
-        'user': strategy.create_user(**fields)
+        'user': user
     }
 
 
